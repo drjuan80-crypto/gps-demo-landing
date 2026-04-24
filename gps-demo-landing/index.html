@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GPS de Glucosa — Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --dark: #123959;
+    --medium: #3372A2;
+    --accent: #3D8CCA;
+    --ink: #2E5F80;
+    --bg: #F5F9FC;
+    --soft: #E6EEF5;
+    --white: #FFFFFF;
+    --green-bg: #EAF3DE;
+    --green-text: #3B6D11;
+    --amber-bg: #FAEEDA;
+    --amber-text: #633806;
+    --red-bg: #FCEBEB;
+    --red-text: #A32D2D;
+    --gray-bg: #F1EFE8;
+    --gray-text: #5F5E5A;
+    --legume-bg: #DDE9E4;
+    --legume-text: #2A5043;
+    --radius: 18px;
+    --radius-sm: 12px;
+    --shadow: 0 8px 32px rgba(18, 57, 89, 0.08);
+    --shadow-lg: 0 20px 60px rgba(18, 57, 89, 0.15);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Nunito', -apple-system, sans-serif;
+    color: var(--dark);
+    background: var(--bg);
+    line-height: 1.55;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  nav { background: var(--white); border-bottom: 1px solid var(--soft); padding: 14px 0; }
+  .nav-inner { max-width: 920px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 15px; color: var(--dark); }
+  .brand-mark { width: 34px; height: 34px; background: linear-gradient(135deg, var(--dark), var(--accent)); border-radius: 10px; display: grid; place-items: center; color: white; font-weight: 800; font-size: 15px; }
+  .nav-tag { background: var(--soft); color: var(--medium); padding: 5px 12px; border-radius: 100px; font-size: 12px; font-weight: 700; }
+  main { max-width: 720px; margin: 0 auto; padding: 30px 20px 50px; }
+  .state { display: none; animation: fade .35s ease; }
+  .state.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .hero-title { font-size: clamp(28px, 4.5vw, 38px); font-weight: 900; line-height: 1.15; color: var(--dark); margin-bottom: 10px; letter-spacing: -0.02em; }
+  .hero-title .hl { background: linear-gradient(120deg, var(--accent), var(--medium)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero-credit { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 16px; padding-left: 10px; border-left: 3px solid var(--accent); }
+  .hero-lead { color: var(--ink); font-size: 17px; margin-bottom: 26px; }
+  .hero-meta { display: flex; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
+  .meta-chip { background: var(--white); border: 1px solid var(--soft); padding: 8px 14px; border-radius: 100px; font-size: 13px; font-weight: 600; color: var(--medium); display: inline-flex; align-items: center; gap: 6px; }
+  .meta-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+  .section-label { font-size: 13px; font-weight: 700; color: var(--medium); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px; }
+  .section-label.second { margin-top: 32px; }
+  .scenarios { display: grid; gap: 12px; margin-bottom: 10px; }
+  .scenario { background: var(--white); border: 1.5px solid var(--soft); border-radius: var(--radius); padding: 20px; cursor: pointer; transition: all .2s; text-align: left; width: 100%; font-family: inherit; }
+  .scenario:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow); }
+  .scenario-featured { background: linear-gradient(135deg, rgba(61,140,202,0.08), rgba(51,114,162,0.02)); border: 1.5px solid var(--accent); }
+  .scenario-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 10px; }
+  .scenario-title { font-size: 17px; font-weight: 800; color: var(--dark); }
+  .scenario-tag { padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+  .tag-red { background: var(--red-bg); color: var(--red-text); }
+  .tag-green { background: var(--green-bg); color: var(--green-text); }
+  .tag-amber { background: var(--amber-bg); color: var(--amber-text); }
+  .tag-blue { background: var(--soft); color: var(--medium); }
+  .scenario-desc { color: var(--ink); font-size: 14px; line-height: 1.5; }
+  .scenario-arrow { font-size: 13px; color: var(--medium); font-weight: 700; margin-top: 10px; display: inline-block; }
+
+  .step-header { text-align: center; margin-bottom: 24px; }
+  .step-num { display: inline-block; background: var(--soft); color: var(--medium); padding: 5px 14px; border-radius: 100px; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
+  .step-title { font-size: 24px; font-weight: 800; color: var(--dark); margin-bottom: 6px; line-height: 1.2; }
+  .step-sub { color: var(--ink); font-size: 15px; }
+
+  .reg-panel { background: var(--white); border: 1px solid var(--soft); border-radius: var(--radius); padding: 22px; margin-bottom: 18px; }
+  .reg-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--soft); gap: 14px; }
+  .reg-row:last-child { border-bottom: none; }
+  .reg-label { font-size: 13px; font-weight: 600; color: var(--ink); flex-shrink: 0; }
+  .reg-value { font-size: 14px; font-weight: 700; color: var(--dark); text-align: right; }
+
+  .plate-foods { font-size: 14px; color: var(--ink); line-height: 1.5; padding: 8px 0; }
+  .plate-foods .food-group { margin-bottom: 8px; display: flex; gap: 6px; align-items: flex-start; }
+  .plate-foods .food-group .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .plate-foods .food-group .content { flex: 1; }
+  .plate-foods .food-group strong { color: var(--dark); font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; display: block; margin-bottom: 2px; }
+
+  .btn { padding: 15px 26px; border-radius: 100px; font-weight: 800; font-size: 15px; border: none; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all .2s; text-decoration: none; }
+  .btn-primary { background: var(--dark); color: white; box-shadow: 0 6px 20px rgba(18, 57, 89, 0.2); width: 100%; }
+  .btn-primary:hover { background: var(--medium); transform: translateY(-1px); }
+  .btn-ghost { background: transparent; color: var(--medium); border: 1.5px solid var(--soft); width: 100%; }
+  .btn-ghost:hover { border-color: var(--medium); color: var(--dark); background: var(--white); }
+  .btn-row { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+
+  .processing { text-align: center; padding: 60px 0; }
+  .spinner { width: 54px; height: 54px; border: 3px solid var(--soft); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 24px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .processing-text { font-size: 16px; color: var(--ink); font-weight: 700; }
+  .processing-dots { margin-top: 6px; font-size: 13px; color: var(--medium); min-height: 20px; }
+
+  .synth-card { background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-lg); margin-bottom: 18px; }
+  .synth-header { background: linear-gradient(135deg, var(--dark), var(--medium)); color: white; padding: 22px 24px; }
+  .synth-header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 12px; opacity: 0.85; font-weight: 600; }
+  .synth-moment { font-size: 18px; font-weight: 800; }
+  .synth-body { padding: 24px; }
+
+  .val-display { text-align: center; padding: 20px; border-radius: var(--radius-sm); margin-bottom: 20px; }
+  .val-display.red { background: var(--red-bg); }
+  .val-display.green { background: var(--green-bg); }
+  .val-display.amber { background: var(--amber-bg); }
+  .val-number { font-size: 48px; font-weight: 900; line-height: 1; letter-spacing: -0.03em; }
+  .val-display.red .val-number { color: var(--red-text); }
+  .val-display.green .val-number { color: var(--green-text); }
+  .val-display.amber .val-number { color: var(--amber-text); }
+  .val-unit { font-size: 18px; font-weight: 700; margin-left: 6px; }
+  .val-label { font-size: 13px; font-weight: 700; margin-top: 8px; opacity: 0.85; }
+  .val-display.red .val-label { color: var(--red-text); }
+  .val-display.green .val-label { color: var(--green-text); }
+  .val-display.amber .val-label { color: var(--amber-text); }
+
+  .trio { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+  .trio-cell { text-align: center; padding: 14px 8px; border-radius: var(--radius-sm); }
+  .trio-cell.pre { background: var(--green-bg); }
+  .trio-cell.delta { background: var(--red-bg); }
+  .trio-cell.post { background: var(--amber-bg); }
+  .trio-num { font-size: 24px; font-weight: 900; line-height: 1; }
+  .trio-cell.pre .trio-num { color: var(--green-text); }
+  .trio-cell.delta .trio-num { color: var(--red-text); }
+  .trio-cell.post .trio-num { color: var(--amber-text); }
+  .trio-lbl { font-size: 10px; font-weight: 800; margin-top: 6px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .trio-cell.pre .trio-lbl { color: var(--green-text); }
+  .trio-cell.delta .trio-lbl { color: var(--red-text); }
+  .trio-cell.post .trio-lbl { color: var(--amber-text); }
+
+  .badges-label { font-size: 13px; font-weight: 800; color: var(--ink); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .badges { display: flex; flex-direction: column; gap: 8px; margin-bottom: 22px; }
+  .badge { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-radius: var(--radius-sm); gap: 10px; }
+  .badge-left { display: flex; align-items: center; gap: 10px; flex: 1; font-size: 14px; font-weight: 600; }
+  .badge-icon { font-size: 18px; }
+  .badge-text { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 100px; white-space: nowrap; }
+  .b-green { background: var(--green-bg); color: var(--green-text); }
+  .b-green .badge-text { background: var(--green-text); color: var(--green-bg); }
+  .b-green-soft { background: var(--green-bg); color: var(--green-text); opacity: 0.78; }
+  .b-green-soft .badge-text { background: rgba(59, 109, 17, 0.2); color: var(--green-text); }
+  .b-amber { background: var(--amber-bg); color: var(--amber-text); }
+  .b-amber .badge-text { background: var(--amber-text); color: var(--amber-bg); }
+  .b-red { background: var(--red-bg); color: var(--red-text); }
+  .b-red .badge-text { background: var(--red-text); color: var(--red-bg); }
+  .b-gray { background: var(--gray-bg); color: var(--gray-text); }
+  .b-gray .badge-text { background: var(--gray-text); color: var(--gray-bg); }
+
+  .synth-message { background: var(--bg); border-left: 3px solid var(--accent); padding: 16px 18px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-size: 14.5px; color: var(--dark); line-height: 1.6; }
+  .synth-footer { background: var(--bg); padding: 14px 24px; font-size: 11px; color: var(--ink); text-align: center; font-weight: 600; border-top: 1px solid var(--soft); }
+
+  .closing { background: linear-gradient(135deg, var(--dark), var(--medium)); color: white; padding: 32px 26px; border-radius: var(--radius); text-align: center; margin-bottom: 16px; }
+  .closing h3 { font-size: 22px; font-weight: 900; margin-bottom: 12px; line-height: 1.25; }
+  .closing p { font-size: 15px; opacity: 0.92; margin-bottom: 22px; line-height: 1.55; }
+  .btn-white { background: white; color: var(--dark); }
+  .btn-white:hover { background: var(--bg); transform: translateY(-1px); }
+  .closing-linkrow { margin-top: 18px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.15); font-size: 13px; opacity: 0.9; }
+  .closing-linkrow a { color: white; text-decoration: underline; font-weight: 700; cursor: pointer; }
+
+  .disclaimer { font-size: 13px; color: var(--ink); text-align: center; font-style: italic; margin-top: 14px; opacity: 0.85; line-height: 1.5; }
+
+  .patron-header { background: linear-gradient(135deg, var(--dark), var(--medium)); color: white; padding: 24px 26px; border-radius: var(--radius); margin-bottom: 14px; }
+  .patron-header-top { font-size: 12px; font-weight: 700; letter-spacing: 0.05em; opacity: 0.85; text-transform: uppercase; margin-bottom: 8px; }
+  .patron-header h2 { font-size: 22px; font-weight: 900; line-height: 1.25; margin-bottom: 12px; }
+  .patron-header-meta { display: flex; gap: 10px; flex-wrap: wrap; font-size: 12px; font-weight: 700; opacity: 0.95; }
+  .patron-header-meta span { background: rgba(255,255,255,0.15); padding: 5px 11px; border-radius: 100px; }
+
+  .patron-card { background: var(--white); border: 1px solid var(--soft); border-radius: var(--radius); padding: 22px; margin-bottom: 14px; }
+  .patron-card-label { font-size: 17px; font-weight: 900; color: var(--dark); line-height: 1.25; margin-bottom: 4px; }
+  .patron-card-tag { font-size: 12px; font-weight: 700; color: var(--medium); margin-bottom: 14px; letter-spacing: 0.02em; }
+  .patron-card-sub { font-size: 14px; color: var(--ink); margin-bottom: 14px; line-height: 1.5; }
+  .patron-card h4 { font-size: 15px; font-weight: 700; color: var(--dark); line-height: 1.4; margin-bottom: 14px; }
+
+  .formula-list { list-style: none; margin-bottom: 16px; }
+  .formula-list li { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; background: var(--green-bg); border-radius: var(--radius-sm); margin-bottom: 8px; color: var(--green-text); font-size: 14px; font-weight: 600; line-height: 1.4; }
+  .formula-list .num { flex-shrink: 0; width: 26px; height: 26px; background: var(--green-text); color: var(--green-bg); border-radius: 50%; display: grid; place-items: center; font-weight: 900; font-size: 13px; }
+  .formula-stats { background: var(--bg); border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+  .formula-stats .line { font-size: 14px; color: var(--dark); line-height: 1.5; }
+  .formula-stats b { color: var(--green-text); font-weight: 900; }
+  .benefits-block p { font-size: 14px; font-weight: 800; color: var(--dark); margin-bottom: 10px; }
+  .benefits-block ul { list-style: none; padding: 0; }
+  .benefits-block li { font-size: 13.5px; color: var(--ink); padding: 5px 0 5px 20px; position: relative; line-height: 1.5; }
+  .benefits-block li::before { content: "·"; position: absolute; left: 8px; color: var(--accent); font-weight: 900; font-size: 18px; line-height: 1; }
+
+  .palanca-action { font-size: 22px; font-weight: 900; color: var(--green-text); text-align: center; padding: 14px; background: var(--green-bg); border-radius: var(--radius-sm); margin-bottom: 6px; line-height: 1.2; }
+  .palanca-sub { font-size: 13px; color: var(--ink); text-align: center; margin-bottom: 16px; }
+  .comparison { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; margin-bottom: 14px; }
+  .comparison.two { grid-template-columns: 1fr 1fr; }
+  .comp-cell { text-align: center; padding: 14px 10px; border-radius: var(--radius-sm); }
+  .comp-cell.green { background: var(--green-bg); }
+  .comp-cell.red { background: var(--red-bg); }
+  .comp-cell.amber { background: var(--amber-bg); }
+  .comp-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.75; margin-bottom: 4px; }
+  .comp-cell.green .comp-label { color: var(--green-text); }
+  .comp-cell.red .comp-label { color: var(--red-text); }
+  .comp-cell.amber .comp-label { color: var(--amber-text); }
+  .comp-num { font-size: 26px; font-weight: 900; line-height: 1; }
+  .comp-cell.green .comp-num { color: var(--green-text); }
+  .comp-cell.red .comp-num { color: var(--red-text); }
+  .comp-cell.amber .comp-num { color: var(--amber-text); }
+  .comp-unit { font-size: 12px; font-weight: 700; margin-top: 4px; opacity: 0.85; }
+  .comp-cell.green .comp-unit { color: var(--green-text); }
+  .comp-cell.red .comp-unit { color: var(--red-text); }
+  .comp-cell.amber .comp-unit { color: var(--amber-text); }
+  .comp-arrow { font-size: 22px; color: var(--medium); font-weight: 900; }
+
+  .patron-item { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--soft); }
+  .patron-item:last-child { border-bottom: none; }
+  .patron-item-body { flex: 1; }
+  .patron-item-title { font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 3px; }
+  .patron-item-detail { font-size: 12.5px; color: var(--ink); line-height: 1.4; }
+  .patron-item .badge-text { flex-shrink: 0; margin-top: 2px; }
+
+  .items-group-label { font-size: 12px; font-weight: 800; color: var(--dark); margin: 16px 0 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .items-minor { background: var(--bg); padding: 14px 16px; border-radius: var(--radius-sm); margin-top: 14px; }
+  .items-minor-title { font-size: 13px; font-weight: 800; color: var(--dark); margin-bottom: 8px; }
+  .items-minor ul { list-style: none; }
+  .items-minor li { font-size: 12.5px; color: var(--ink); padding: 4px 0 4px 16px; position: relative; line-height: 1.5; }
+  .items-minor li::before { content: "·"; position: absolute; left: 4px; color: var(--accent); font-weight: 900; }
+
+  .legume-box { background: var(--legume-bg); border-left: 3px solid var(--legume-text); padding: 14px 16px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin-top: 14px; }
+  .legume-box-title { font-size: 13px; font-weight: 800; color: var(--legume-text); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.03em; }
+  .legume-box-detail { font-size: 13px; color: var(--legume-text); line-height: 1.55; margin-bottom: 8px; }
+  .legume-box-note { font-size: 12px; color: var(--legume-text); line-height: 1.5; font-style: italic; opacity: 0.9; }
+
+  .stat-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+  .stat-box { background: var(--bg); padding: 14px 8px; border-radius: var(--radius-sm); text-align: center; }
+  .stat-box.green { background: var(--green-bg); }
+  .stat-box.amber { background: var(--amber-bg); }
+  .stat-box.red { background: var(--red-bg); }
+  .stat-num { font-size: 26px; font-weight: 900; color: var(--dark); line-height: 1; }
+  .stat-box.green .stat-num { color: var(--green-text); }
+  .stat-box.amber .stat-num { color: var(--amber-text); }
+  .stat-box.red .stat-num { color: var(--red-text); }
+  .stat-lbl { font-size: 10.5px; color: var(--ink); margin-top: 6px; font-weight: 700; line-height: 1.3; text-transform: uppercase; letter-spacing: 0.02em; }
+  .stat-box.green .stat-lbl { color: var(--green-text); }
+  .stat-box.amber .stat-lbl { color: var(--amber-text); }
+  .stat-box.red .stat-lbl { color: var(--red-text); }
+
+  .inline-list { background: var(--bg); border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 10px; }
+  .inline-list-title { font-size: 13px; font-weight: 800; color: var(--dark); margin-bottom: 8px; line-height: 1.4; }
+  .inline-list ul { list-style: none; }
+  .inline-list li { font-size: 13px; color: var(--ink); padding: 3px 0 3px 14px; position: relative; line-height: 1.5; }
+  .inline-list li::before { content: "·"; position: absolute; left: 4px; color: var(--accent); font-weight: 900; }
+
+  .note-line { background: var(--bg); border-left: 3px solid var(--accent); padding: 12px 14px; font-size: 13.5px; color: var(--dark); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; line-height: 1.55; margin-top: 10px; }
+  .note-line.red { border-left-color: var(--red-text); background: var(--red-bg); color: var(--red-text); }
+
+  .alert-card { border-color: var(--red-bg); background: linear-gradient(180deg, #FFF, #FEF6F6); }
+  .alert-title { background: var(--red-bg); color: var(--red-text); padding: 12px 14px; border-radius: var(--radius-sm); font-size: 14.5px; font-weight: 800; margin-bottom: 14px; line-height: 1.4; }
+  .hypo-list { list-style: none; margin-bottom: 10px; }
+  .hypo-list li { background: var(--bg); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 6px; font-size: 13px; color: var(--ink); line-height: 1.4; border-left: 3px solid var(--red-text); }
+  .hypo-list li strong { color: var(--red-text); font-weight: 800; }
+
+  .patron-map { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .map-item { display: flex; gap: 10px; align-items: center; padding: 12px; border-radius: var(--radius-sm); }
+  .map-item.identified { background: var(--green-bg); }
+  .map-item.pending { background: var(--gray-bg); opacity: 0.75; }
+  .map-num { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; font-size: 13px; }
+  .map-item.identified .map-num { background: var(--green-text); color: var(--green-bg); }
+  .map-item.pending .map-num { background: var(--gray-text); color: var(--gray-bg); }
+  .map-title { font-size: 13px; font-weight: 800; line-height: 1.2; margin-bottom: 2px; }
+  .map-item.identified .map-title { color: var(--green-text); }
+  .map-item.pending .map-title { color: var(--gray-text); }
+  .map-status { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; }
+  .map-item.identified .map-status { color: var(--green-text); opacity: 0.85; }
+  .map-item.pending .map-status { color: var(--gray-text); opacity: 0.85; }
+
+  .patron-footer-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .pf-stat { background: var(--white); border: 1px solid var(--soft); padding: 16px; border-radius: var(--radius-sm); text-align: center; }
+  .pf-stat-num { font-size: 22px; font-weight: 900; color: var(--dark); line-height: 1; }
+  .pf-stat-lbl { font-size: 12px; color: var(--ink); margin-top: 6px; font-weight: 700; }
+
+  @media (max-width: 520px) {
+    main { padding: 20px 16px 40px; }
+    .synth-header, .synth-body { padding: 18px; }
+
+    .val-number { font-size: 40px; }
+    .trio-num { font-size: 20px; }
+    .patron-header h2 { font-size: 20px; }
+    .patron-item { flex-direction: column; align-items: flex-start; }
+    .comparison { grid-template-columns: 1fr; }
+    .comp-arrow { transform: rotate(90deg); justify-self: center; }
+    .patron-map { grid-template-columns: 1fr; }
+    .palanca-action { font-size: 19px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="brand">
+      <div class="brand-mark">C</div>
+      <span>Conciencia en tu Salud</span>
+    </div>
+    <div class="nav-tag">Demo · GPS de Glucosa</div>
+  </div>
+</nav>
+
+<main>
+  <!-- STATE 1: WELCOME -->
+  <div class="state active" id="state-welcome">
+    <h1 class="hero-title">Vive cómo la app traduce tus datos en <span class="hl">aprendizaje real</span></h1>
+    <div class="hero-credit">Método clínico del Dr. Juan Luis González Hernández<br>Médico Internista · Maestría en Obesidad y Diabetes</div>
+    <p class="hero-lead">En menos de 2 minutos experimenta casos reales. Verás el mismo mensaje integrador, los mismos badges y el mismo lenguaje clínico que entrega la app a quienes la usan todos los días.</p>
+    <div class="hero-meta">
+      <div class="meta-chip"><span class="dot"></span>Demo 100% funcional</div>
+      <div class="meta-chip"><span class="dot"></span>Sin registro</div>
+      <div class="meta-chip"><span class="dot"></span>Casos clínicos reales</div>
+    </div>
+
+    <div class="section-label">Una sola lectura · ver la síntesis de la app</div>
+    <div class="scenarios">
+      <button class="scenario" onclick="selectScenario(0)">
+        <div class="scenario-head">
+          <div class="scenario-title">Ayuno elevado con cena cargada</div>
+          <div class="scenario-tag tag-red">127 mg/dL</div>
+        </div>
+        <div class="scenario-desc">Dormiste bien, pero la cena previa incluyó varias fuentes de carbohidratos. ¿Qué factor tuvo más peso en el resultado de la mañana?</div>
+        <div class="scenario-arrow">Explorar este caso →</div>
+      </button>
+      <button class="scenario" onclick="selectScenario(1)">
+        <div class="scenario-head">
+          <div class="scenario-title">Ayuno normal tras 12h sin alimento</div>
+          <div class="scenario-tag tag-green">84 mg/dL</div>
+        </div>
+        <div class="scenario-desc">Descansaste bien, el día previo fue tranquilo y respetaste el ayuno prolongado. Mira cómo la app identifica el patrón que vale la pena repetir.</div>
+        <div class="scenario-arrow">Explorar este caso →</div>
+      </button>
+      <button class="scenario" onclick="selectScenario(2)">
+        <div class="scenario-head">
+          <div class="scenario-title">Comida con pico postprandial</div>
+          <div class="scenario-tag tag-amber">+37 mg/dL</div>
+        </div>
+        <div class="scenario-desc">Una colación con dos carbohidratos más leguminosas, sueño regular y sin movimiento. La app detecta el pico y pone cada factor en contexto.</div>
+        <div class="scenario-arrow">Explorar este caso →</div>
+      </button>
+      <button class="scenario" onclick="selectScenario(3)">
+        <div class="scenario-head">
+          <div class="scenario-title">Antes de dormir tras un día tenso</div>
+          <div class="scenario-tag tag-amber">118 mg/dL</div>
+        </div>
+        <div class="scenario-desc">Sin alimento reciente, pero un día de estrés intenso. La app muestra cómo la tensión sostenida puede elevar la glucosa aunque no haya comida de por medio.</div>
+        <div class="scenario-arrow">Explorar este caso →</div>
+      </button>
+      <button class="scenario" onclick="selectScenario(4)">
+        <div class="scenario-head">
+          <div class="scenario-title">Comida balanceada sin pico</div>
+          <div class="scenario-tag tag-green">+14 mg/dL</div>
+        </div>
+        <div class="scenario-desc">Plato con pocos carbohidratos, caminata post-comida y descanso adecuado. Así luce el patrón que la app te ayuda a identificar y repetir.</div>
+        <div class="scenario-arrow">Explorar este caso →</div>
+      </button>
+    </div>
+
+    <div class="section-label second">Muchas lecturas juntas · los 6 patrones del método</div>
+    <button class="scenario scenario-featured" onclick="goToPatrones()">
+      <div class="scenario-head">
+        <div class="scenario-title">Mis Patrones · 148 lecturas en 3 meses</div>
+        <div class="scenario-tag tag-blue">Análisis del método</div>
+      </div>
+      <div class="scenario-desc">Ejemplo real de la vista Mis Patrones después de registrar con constancia. La app identifica los 6 patrones del método GPS de Glucosa (Cap. 12 del eBook) en tus propios datos.</div>
+      <div class="scenario-arrow">Ver análisis completo →</div>
+    </button>
+  </div>
+
+  <!-- STATE 2: REGISTRATION PREVIEW -->
+  <div class="state" id="state-registro">
+    <div class="step-header">
+      <span class="step-num">Paso 1 de 2</span>
+      <div class="step-title">Lo que se registró</div>
+      <div class="step-sub">Así se vería este registro en la app</div>
+    </div>
+    <div class="reg-panel" id="reg-panel"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goToSynthesis()">Ver la síntesis de la app →</button>
+      <button class="btn btn-ghost" onclick="goToWelcome()">← Cambiar escenario</button>
+    </div>
+  </div>
+
+  <!-- STATE 3: PROCESSING -->
+  <div class="state" id="state-processing">
+    <div class="processing">
+      <div class="spinner"></div>
+      <div class="processing-text">Procesando registro</div>
+      <div class="processing-dots" id="processing-dots">Analizando composición de alimentos...</div>
+    </div>
+  </div>
+
+  <!-- STATE 4: SYNTHESIS -->
+  <div class="state" id="state-synthesis">
+    <div class="step-header">
+      <span class="step-num">Paso 2 de 2 · Síntesis</span>
+      <div class="step-title">Esto es lo que la app te devuelve</div>
+      <div class="step-sub">Misma tarjeta que ves después de cada registro</div>
+    </div>
+    <div class="synth-card" id="synth-card"></div>
+    <div class="closing">
+      <h3>Esto fue solo una lectura.<br>Con las tuyas, la app revela tu patrón personal.</h3>
+      <p>Tu mapa personal empieza aquí. GPS de Glucosa incluye la app + el eBook completo del método. Escríbeme por WhatsApp para conocer cómo obtenerla.</p>
+      <a href="https://wa.me/527711897044?text=Hola%20Dr.%20Juan%20Luis%2C%20me%20interesa%20GPS%20de%20Glucosa" class="btn btn-white" id="whatsapp-link" target="_blank" rel="noopener" style="width: auto;">Escríbeme por WhatsApp →</a>
+      <div class="closing-linkrow">
+        ¿Quieres ver qué pasa después de 148 registros? <a onclick="goToPatrones()">Ver ejemplo de Mis Patrones →</a>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goToWelcome()">Probar otro escenario</button>
+    </div>
+    <div class="disclaimer">Esta demo reproduce casos clínicos observacionales. No sustituye diagnóstico ni tratamiento médico.</div>
+  </div>
+
+  <!-- STATE 5: PATRONES -->
+  <div class="state" id="state-patrones">
+    <div class="step-header">
+      <span class="step-num">Vista Mis Patrones · ejemplo</span>
+      <div class="step-title">Lo que tus lecturas revelan cuando se acumulan</div>
+      <div class="step-sub">Así luce la sección Mis Patrones en la app real</div>
+    </div>
+
+    <div class="patron-header">
+      <div class="patron-header-top">Mis Patrones</div>
+      <h2>Lo que tus 148 lecturas te están mostrando</h2>
+      <div class="patron-header-meta">
+        <span>📅 3 meses de registro</span>
+        <span>📊 Promedio 100 mg/dL</span>
+      </div>
+    </div>
+
+    <div class="patron-card">
+      <div class="patron-card-label">Tu fórmula que sí funciona</div>
+      <div class="patron-card-tag">Integra los 6 patrones · Cap. 12</div>
+      <h4>Cuando estos 3 factores aparecen juntos en tus registros, tu cuerpo responde favorablemente:</h4>
+      <ol class="formula-list">
+        <li><span class="num">1</span>Caminata de 15 minutos o más después de comer</li>
+        <li><span class="num">2</span>Comida sin bolillo, arroz ni tortilla refinada</li>
+        <li><span class="num">3</span>Sueño de 7 horas o más la noche previa</li>
+      </ol>
+      <div class="formula-stats">
+        <div class="line">Registraste esta combinación en <b>6 comidas</b></div>
+        <div class="line"><b>5 de 6</b> no generaron pico</div>
+        <div class="line">Ascenso promedio: solo <b>+14 mg/dL</b></div>
+      </div>
+      <div class="benefits-block">
+        <p>Este es el patrón que confirma tu dirección. Repetirlo suma a lograr:</p>
+        <ul>
+          <li>Respuesta metabólica estable en cada comida</li>
+          <li>Energía sostenida sin fluctuaciones bruscas</li>
+          <li>Recuperación progresiva de la función pancreática</li>
+          <li>Mejora sostenida en la sensibilidad a la insulina</li>
+          <li>Apertura real a reducir el apoyo farmacológico en el tiempo</li>
+          <li>Protección cardiovascular a largo plazo</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="patron-card">
+      <div class="patron-card-label">Tu palanca más fuerte</div>
+      <div class="patron-card-tag">Patrón 6 · Movimiento · Cap. 12</div>
+      <h4>Hay una sola acción que, cuando la haces, cambia la respuesta de tu glucosa:</h4>
+      <div class="palanca-action">Moverte después de comer</div>
+      <div class="palanca-sub">15 minutos bastan para ayudar a que la glucosa se eleve menos</div>
+      <div class="comparison">
+        <div class="comp-cell green">
+          <div class="comp-label">Con movimiento</div>
+          <div class="comp-num">+21</div>
+          <div class="comp-unit">mg/dL</div>
+        </div>
+        <div class="comp-arrow">→</div>
+        <div class="comp-cell red">
+          <div class="comp-label">Sin movimiento</div>
+          <div class="comp-num">+47</div>
+          <div class="comp-unit">mg/dL</div>
+        </div>
+      </div>
+      <div class="note-line"><b>26 mg/dL menos</b> cada vez que eliges moverte. En un mes son cientos de mg/dL que tu cuerpo no tiene que procesar.</div>
+    </div>
+
+    <div class="patron-card">
+      <div class="patron-card-label">Alimentos que generan pico de glucosa</div>
+      <div class="patron-card-tag">Patrón 1 · Cap. 12</div>
+      <div class="patron-card-sub">De tus comidas con medición antes y después.</div>
+      <div class="note-line" style="margin-top: 0; margin-bottom: 16px;">Cuando una comida incluye varios carbohidratos, el pico puede atribuirse a cualquiera de ellos o a su combinación. Esta lista muestra los carbohidratos de riesgo presentes en comidas donde se registró pico.</div>
+
+      <div class="items-group-label">Patrones alimentarios identificados</div>
+
+      <div class="patron-item">
+        <div class="patron-item-body">
+          <div class="patron-item-title">Bolillo</div>
+          <div class="patron-item-detail">Registrado 16 veces · las 16 generaron pico · ascenso promedio +66 mg/dL</div>
+        </div>
+        <span class="badge-text" style="background: var(--red-text); color: var(--red-bg);">Relación fuerte</span>
+      </div>
+      <div class="patron-item">
+        <div class="patron-item-body">
+          <div class="patron-item-title">Arroz</div>
+          <div class="patron-item-detail">Registrado 20 veces · las 20 generaron pico · ascenso promedio +61 mg/dL</div>
+        </div>
+        <span class="badge-text" style="background: var(--red-text); color: var(--red-bg);">Relación fuerte</span>
+      </div>
+      <div class="patron-item">
+        <div class="patron-item-body">
+          <div class="patron-item-title">Tortilla de maíz</div>
+          <div class="patron-item-detail">Presente en 28 comidas · 26 con pico · ascenso promedio +53 mg/dL</div>
+        </div>
+        <span class="badge-text" style="background: var(--red-text); color: var(--red-bg);">Relación fuerte</span>
+      </div>
+      <div class="patron-item">
+        <div class="patron-item-body">
+          <div class="patron-item-title">Pan blanco</div>
+          <div class="patron-item-detail">Registrado 5 veces · las 5 generaron pico · ascenso promedio +54 mg/dL</div>
+        </div>
+        <span class="badge-text" style="background: var(--red-text); color: var(--red-bg);">Relación fuerte</span>
+      </div>
+
+      <div class="legume-box">
+        <div class="legume-box-title">🫘 Leguminosas · categoría aparte</div>
+        <div class="legume-box-detail">Frijoles presentes en 36 comidas · 30 con pico · ascenso promedio en esas comidas +52 mg/dL</div>
+        <div class="legume-box-note">Las leguminosas son una categoría alimentaria distinta de los carbohidratos de riesgo. Su presencia en comidas con pico no las clasifica como causantes — el análisis debe considerar el resto de fuentes de carbohidratos presentes. En este método, los frijoles solos raramente generan pico significativo.</div>
+      </div>
+
+      <div class="items-minor">
+        <div class="items-minor-title">Otros alimentos con relación observada</div>
+        <div style="font-size: 12.5px; color: var(--ink); margin-bottom: 8px; line-height: 1.5;">Registrados 1 o 2 veces, todos con pico. Aún sin frecuencia suficiente para confirmar patrón:</div>
+        <ul>
+          <li>Tamal de guisado: 1 de 1 con pico (+100 mg/dL)</li>
+          <li>Refresco con azúcar: 1 de 1 con pico (+71 mg/dL)</li>
+          <li>Quinoa: 1 de 1 con pico (+69 mg/dL)</li>
+          <li>Pan integral: 2 de 2 con pico (+65 mg/dL)</li>
+          <li>Manzana: 2 de 2 con pico (+64 mg/dL)</li>
+          <li>Mango: 1 de 1 con pico (+58 mg/dL)</li>
+        </ul>
+        <div style="font-size: 12px; color: var(--ink); margin-top: 8px; font-style: italic;">Mientras más registres, mejor podrás identificar tus patrones personales.</div>
+      </div>
+
+      <div class="benefits-block" style="margin-top: 16px;">
+        <p>Cuando eliges alimentos que apoyan tu salud, sumas a lograr:</p>
+        <ul>
+          <li>Sostener energía más estable a lo largo del día</li>
+          <li>Mantenerte en la zona funcional de seguridad (80 a 140 mg/dL)</li>
+          <li>Recuperar la función pancreática</li>
+          <li>Mejorar la sensibilidad a la insulina</li>
+          <li>Revertir progresivamente el daño metabólico</li>
+          <li>Abrir la posibilidad de reducir el apoyo farmacológico</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="patron-card">
+      <div class="patron-card-label">El estrés alto también genera pico</div>
+      <div class="patron-card-tag">Patrón 5 · Cap. 12</div>
+      <h4>Comparativa entre tus comidas con estrés alto y con estrés bajo:</h4>
+      <div class="comparison two">
+        <div class="comp-cell red">
+          <div class="comp-label">Estrés alto</div>
+          <div class="comp-num">9 de 10</div>
+          <div class="comp-unit">con pico</div>
+        </div>
+        <div class="comp-cell amber">
+          <div class="comp-label">Estrés bajo</div>
+          <div class="comp-num">6 de 10</div>
+          <div class="comp-unit">con pico</div>
+        </div>
+      </div>
+      <div class="note-line">El descanso suficiente, las pausas durante el día y las prácticas que bajan tu carga emocional también cuidan tu glucosa. No son procesos separados — es el mismo cuerpo.</div>
+    </div>
+
+    <div class="patron-card">
+      <div class="patron-card-label">Cómo amaneces cada día</div>
+      <div class="patron-card-tag">Patrón 2 + Patrón 4 · Cap. 12</div>
+      <div class="patron-card-sub">Tus 47 lecturas en ayuno</div>
+
+      <div class="stat-grid-3">
+        <div class="stat-box green">
+          <div class="stat-num">19</div>
+          <div class="stat-lbl">óptimas<br>&lt;100</div>
+        </div>
+        <div class="stat-box amber">
+          <div class="stat-num">22</div>
+          <div class="stat-lbl">elevadas<br>100–125</div>
+        </div>
+        <div class="stat-box red">
+          <div class="stat-num">6</div>
+          <div class="stat-lbl">muy altas<br>&gt;126</div>
+        </div>
+      </div>
+
+      <div class="inline-list">
+        <div class="inline-list-title">Lo que caracteriza tus 19 mañanas óptimas:</div>
+        <ul>
+          <li>Sueño de 7 horas o más: 17 de 19</li>
+          <li>Estrés bajo el día previo: 7 de 19</li>
+        </ul>
+      </div>
+      <div class="inline-list">
+        <div class="inline-list-title">Lo que se repite en tus 28 mañanas elevadas:</div>
+        <ul>
+          <li>Sueño menor a 6 horas: 15 de 28</li>
+          <li>Estrés alto o moderado: 22 de 28</li>
+        </ul>
+      </div>
+
+      <div class="note-line">Tu glucosa al despertar no se define en la mañana — se define con lo que haces la noche anterior. Las mañanas óptimas te están mostrando que ese cambio está a tu alcance.</div>
+    </div>
+
+    <div class="patron-card alert-card">
+      <div class="patron-card-label">Tus episodios de hipoglucemia</div>
+      <div class="patron-card-tag">Observación clínica · Cap. 12</div>
+      <div class="alert-title">Presentaste 3 episodios con valor menor a 70 mg/dL — merecen revisión médica</div>
+
+      <div class="items-group-label" style="margin-top: 0;">Contexto de cada episodio</div>
+      <ul class="hypo-list">
+        <li><strong>13 abr · 66 mg/dL</strong> en ayuno matinal · con actividad física ese día</li>
+        <li><strong>22 abr · 68 mg/dL</strong> antes de comer · con actividad física ese día</li>
+        <li><strong>28 abr · 65 mg/dL</strong> en ayuno matinal · con actividad física ese día</li>
+      </ul>
+
+      <div class="note-line red">Los episodios de hipoglucemia requieren revisión con tu médico. Considera llevar este contexto para evaluar tu medicación, los horarios de tus comidas, y cómo se relacionan con la actividad física y el descanso nocturno.</div>
+
+      <div style="margin-top: 16px;">
+        <div class="items-group-label" style="margin-top: 0;">Zona preventiva (70–79 mg/dL)</div>
+        <div style="font-size: 13.5px; color: var(--ink); line-height: 1.55;">Presentaste 5 registros en esta zona. No es hipoglucemia, pero es un aviso de que tu glucosa está descendiendo más allá del rango ideal. Observa si coinciden con ayunos prolongados o ejercicio sin refuerzo alimenticio.</div>
+      </div>
+    </div>
+
+    <div class="patron-card">
+      <div class="patron-card-label">Mapa de los 6 patrones del método</div>
+      <div class="patron-card-tag">Referencia del eBook GPS de Glucosa · Cap. 12</div>
+      <div class="patron-map">
+        <div class="map-item identified"><div class="map-num">1</div><div><div class="map-title">Alimento / combinación</div><div class="map-status">Identificado</div></div></div>
+        <div class="map-item pending"><div class="map-num">2</div><div><div class="map-title">Punto de partida</div><div class="map-status">Sin datos suficientes</div></div></div>
+        <div class="map-item identified"><div class="map-num">3</div><div><div class="map-title">Horario</div><div class="map-status">Identificado</div></div></div>
+        <div class="map-item pending"><div class="map-num">4</div><div><div class="map-title">Sueño</div><div class="map-status">Sin datos suficientes</div></div></div>
+        <div class="map-item identified"><div class="map-num">5</div><div><div class="map-title">Estrés</div><div class="map-status">Identificado</div></div></div>
+        <div class="map-item identified"><div class="map-num">6</div><div><div class="map-title">Movimiento</div><div class="map-status">Identificado</div></div></div>
+      </div>
+      <div class="patron-card-sub" style="margin-top: 16px; margin-bottom: 0;">Cada patrón identificado te acerca a una comprensión más completa de tu mapa metabólico personal.</div>
+    </div>
+
+    <div class="patron-footer-stats">
+      <div class="pf-stat">
+        <div class="pf-stat-num">22 días</div>
+        <div class="pf-stat-lbl">Racha actual</div>
+      </div>
+      <div class="pf-stat">
+        <div class="pf-stat-num">96 mg/dL</div>
+        <div class="pf-stat-lbl">Promedio precomida</div>
+      </div>
+    </div>
+    <button class="btn btn-ghost" style="margin-bottom: 18px;">📋 Generar resumen para consulta médica</button>
+
+    <div class="closing">
+      <h3>Esto es lo que la app construye contigo en el tiempo.</h3>
+      <p>Tu mapa personal empieza aquí. GPS de Glucosa incluye la app + el eBook completo del método. Escríbeme por WhatsApp para conocer cómo obtenerla.</p>
+      <a href="https://wa.me/527711897044?text=Hola%20Dr.%20Juan%20Luis%2C%20me%20interesa%20GPS%20de%20Glucosa" class="btn btn-white" target="_blank" rel="noopener" style="width: auto;">Escríbeme por WhatsApp →</a>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goToWelcome()">← Volver al inicio</button>
+    </div>
+
+    <div class="disclaimer">Los datos mostrados son un ejemplo ilustrativo basado en un caso representativo. Cada persona responde distinto — tu app construye tu mapa propio con tus registros.</div>
+  </div>
+</main>
+
+<script>
+const scenarios = [
+  {
+    moment: "Ayuno",
+    date: "Lectura en ayuno",
+    registration: [
+      { label: "Momento", value: "En ayuno" },
+      { label: "Glucosa", value: "127 mg/dL" },
+      { label: "Sueño", value: "Bien · 7-8 horas" },
+      { label: "Estrés", value: "Moderado · ocupado" },
+      { label: "Movimiento", value: "Sin actividad física" }
+    ],
+    plate: {
+      show: true,
+      label: "Cena previa registrada",
+      vegetales: ["Jitomate"],
+      proteinas: ["Pollo"],
+      leguminosas: ["Frijoles"],
+      carbohidratos: ["Tortilla de maíz", "Bolillo", "Arroz"],
+      otros: ["Aguacate"],
+      bebidas: ["Agua simple", "Café con azúcar"]
+    },
+    synthesis: {
+      displayType: "single",
+      value: 127,
+      valueColor: "red",
+      valueLabel: "Ayuno por encima del valor normal",
+      badges: [
+        { icon: "😊", name: "Sueño · Bien", relation: "Relación moderada", color: "b-amber" },
+        { icon: "😐", name: "Estrés · Moderado", relation: "Relación moderada", color: "b-amber" },
+        { icon: "🛌", name: "Sin actividad física", relation: "Relación moderada", color: "b-amber" },
+        { icon: "🍽️", name: "3 carbohidratos · 1 bebida azucarada", relation: "Relación fuerte", color: "b-red" }
+      ],
+      message: "Glucosa elevada — por encima del valor normal (127 mg/dL). Los 3 carbohidratos de la cena anterior (Tortilla de maíz, Bolillo, Arroz) junto con el Café con azúcar tienen relación fuerte con este resultado. Las leguminosas (Frijoles) están presentes pero no se cuentan como carbohidratos de riesgo. El sueño bueno es un pilar a mantener aunque en este registro no logró equilibrar el resultado. El estrés moderado es una variable a considerar. La falta de actividad física es un área de oportunidad — caminar después de comer suele reducir este tipo de elevaciones. Cada registro te acerca a identificar tu patrón personal."
+    }
+  },
+  {
+    moment: "Ayuno",
+    date: "Lectura en ayuno",
+    registration: [
+      { label: "Momento", value: "En ayuno" },
+      { label: "Glucosa", value: "84 mg/dL" },
+      { label: "Alimentos", value: "Ayuno prolongado · 12h+" },
+      { label: "Sueño", value: "Bien · 7-8 horas" },
+      { label: "Estrés", value: "Bajo · día tranquilo" },
+      { label: "Movimiento", value: "Sin actividad física" }
+    ],
+    plate: { show: false },
+    synthesis: {
+      displayType: "single",
+      value: 84,
+      valueColor: "green",
+      valueLabel: "Ayuno normal — menor a 100 mg/dL",
+      badges: [
+        { icon: "😊", name: "Sueño · Bien", relation: "Relación fuerte", color: "b-green" },
+        { icon: "😌", name: "Estrés · Bajo", relation: "Relación fuerte", color: "b-green" },
+        { icon: "🛌", name: "Sin actividad física", relation: "Relación baja", color: "b-green-soft" },
+        { icon: "⏱️", name: "Ayuno prolongado 12h+", relation: "Relación fuerte", color: "b-green" }
+      ],
+      message: "Sueño reparador + estrés bajo tienen relación con este resultado favorable. Si tomas medicamentos para la glucosa, este resultado también puede reflejar su efecto. Este es el patrón que vale la pena identificar y repetir."
+    }
+  },
+  {
+    moment: "Colación vespertina",
+    date: "En mis alimentos · pre+post",
+    registration: [
+      { label: "Momento", value: "En mis alimentos" },
+      { label: "Tipo", value: "Colación vespertina" },
+      { label: "Pre-comida", value: "88 mg/dL" },
+      { label: "Post (75 min)", value: "125 mg/dL" },
+      { label: "Sueño", value: "Regular · 5-6 horas" },
+      { label: "Estrés", value: "Moderado" },
+      { label: "Movimiento", value: "Sin actividad física" }
+    ],
+    plate: {
+      show: true,
+      label: "Alimentos consumidos",
+      vegetales: ["Espinacas", "Lechuga", "Acelga", "Hongos y setas"],
+      proteinas: ["Carne de cerdo"],
+      leguminosas: ["Frijoles"],
+      carbohidratos: ["Tortilla de maíz", "Bolillo"],
+      otros: ["Aguacate"],
+      bebidas: ["Agua de sabor sin azúcar"]
+    },
+    synthesis: {
+      displayType: "trio",
+      pre: 88,
+      delta: 37,
+      post: 125,
+      valueLabel: "Pico de glucosa +37 mg/dL detectado",
+      badges: [
+        { icon: "😐", name: "Sueño · Regular · 5-6 horas", relation: "Relación fuerte", color: "b-red" },
+        { icon: "😐", name: "Estrés · Moderado", relation: "Relación moderada", color: "b-amber" },
+        { icon: "🛌", name: "Sin actividad física", relation: "Relación moderada", color: "b-amber" },
+        { icon: "🍽️", name: "2 carbohidratos", relation: "Relación fuerte", color: "b-red" }
+      ],
+      message: "Pico de +37 mg/dL detectado (postcomida 125 mg/dL). 2 fuentes de carbohidratos (Tortilla de maíz, Bolillo) tienen una relación fuerte con este resultado. Las leguminosas (Frijoles) están presentes pero no se cuentan como carbohidratos de riesgo. La actividad física postcomida puede reducir la magnitud del pico; el estrés moderado es una variable a considerar. Este registro te acerca a decidir con información en lugar de adivinar."
+    }
+  },
+  {
+    moment: "Antes de dormir",
+    date: "En otro momento",
+    registration: [
+      { label: "Momento", value: "En otro momento" },
+      { label: "Contexto", value: "Antes de dormir" },
+      { label: "Glucosa", value: "118 mg/dL" },
+      { label: "Sueño noche previa", value: "Regular · 5-6 horas" },
+      { label: "Estrés del día", value: "Alto · tensión intensa" },
+      { label: "Movimiento", value: "Sin actividad física" },
+      { label: "Síntomas", value: "Tensión, dificultad para relajar" }
+    ],
+    plate: { show: false },
+    synthesis: {
+      displayType: "single",
+      value: 118,
+      valueColor: "amber",
+      valueLabel: "Por encima del rango óptimo antes de dormir",
+      badges: [
+        { icon: "😐", name: "Sueño · Regular · 5-6 horas", relation: "Relación moderada", color: "b-amber" },
+        { icon: "😣", name: "Estrés · Alto · tensión intensa", relation: "Relación fuerte", color: "b-red" },
+        { icon: "🛌", name: "Sin actividad física", relation: "Relación moderada", color: "b-amber" }
+      ],
+      message: "Glucosa por encima del rango óptimo antes de dormir (118 mg/dL). El estrés alto del día tiene relación fuerte con este resultado — el cuerpo en alerta sostenida libera glucosa al torrente aunque no haya alimento reciente. El sueño regular de la noche previa es una variable a considerar. La falta de movimiento es un área de oportunidad. Explorar qué disminuye tu respuesta al estrés puede ser una variable clave para tu patrón personal."
+    }
+  },
+  {
+    moment: "Comida",
+    date: "En mis alimentos · pre+post",
+    registration: [
+      { label: "Momento", value: "En mis alimentos" },
+      { label: "Tipo", value: "Comida" },
+      { label: "Pre-comida", value: "92 mg/dL" },
+      { label: "Post (90 min)", value: "106 mg/dL" },
+      { label: "Sueño", value: "Bien · 7-8 horas" },
+      { label: "Estrés", value: "Bajo · día tranquilo" },
+      { label: "Movimiento", value: "Caminata 20 min post-comida" }
+    ],
+    plate: {
+      show: true,
+      label: "Alimentos consumidos",
+      vegetales: ["Espinacas", "Jitomate", "Pepino", "Calabacita"],
+      proteinas: ["Pollo a la plancha"],
+      leguminosas: ["Frijoles"],
+      carbohidratos: ["1 tortilla de maíz"],
+      otros: ["Aguacate"],
+      bebidas: ["Agua simple con limón"]
+    },
+    synthesis: {
+      displayType: "pair",
+      pre: 92,
+      post: 106,
+      valueLabel: "Sin pico significativo · respuesta favorable",
+      badges: [
+        { icon: "😊", name: "Sueño · Bien · 7-8 horas", relation: "Relación fuerte", color: "b-green" },
+        { icon: "😌", name: "Estrés · Bajo · día tranquilo", relation: "Relación fuerte", color: "b-green" },
+        { icon: "🚶", name: "Caminata post-comida · 20 min", relation: "Relación fuerte", color: "b-green" },
+        { icon: "🍽️", name: "Plato balanceado · 1 carbohidrato", relation: "Relación moderada", color: "b-green" }
+      ],
+      message: "Respuesta favorable tras la comida — ascenso de solo +14 mg/dL, sin pico. El sueño reparador, el estrés bajo y la caminata post-comida tienen relación fuerte con este resultado. El plato balanceado con una sola fuente de carbohidratos es un pilar a mantener. Este es el patrón que vale la pena identificar y repetir."
+    }
+  }
+];
+
+let currentScenario = 0;
+
+function showState(id) {
+  document.querySelectorAll('.state').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goToWelcome() { showState('state-welcome'); }
+
+function selectScenario(idx) {
+  currentScenario = idx;
+  renderRegistration(scenarios[idx]);
+  showState('state-registro');
+}
+
+function goToSynthesis() {
+  showState('state-processing');
+  runProcessingSequence(() => {
+    renderSynthesis(scenarios[currentScenario]);
+    showState('state-synthesis');
+  });
+}
+
+function goToPatrones() { showState('state-patrones'); }
+
+function renderRegistration(sc) {
+  const panel = document.getElementById('reg-panel');
+  let html = '';
+  sc.registration.forEach(row => {
+    html += `<div class="reg-row"><div class="reg-label">${row.label}</div><div class="reg-value">${row.value}</div></div>`;
+  });
+  if (sc.plate.show) {
+    html += `<div class="reg-row" style="flex-direction: column; align-items: stretch;">
+      <div class="reg-label" style="margin-bottom: 10px;">${sc.plate.label}</div>
+      <div class="plate-foods">
+        ${sc.plate.vegetales.length ? `<div class="food-group"><div class="dot" style="background:#3B6D11;"></div><div class="content"><strong>Vegetales</strong>${sc.plate.vegetales.join(', ')}</div></div>` : ''}
+        ${sc.plate.proteinas.length ? `<div class="food-group"><div class="dot" style="background:#A32D2D;"></div><div class="content"><strong>Proteína</strong>${sc.plate.proteinas.join(', ')}</div></div>` : ''}
+        ${sc.plate.leguminosas.length ? `<div class="food-group"><div class="dot" style="background:#2A5043;"></div><div class="content"><strong>Leguminosas (categoría aparte)</strong>${sc.plate.leguminosas.join(', ')}</div></div>` : ''}
+        ${sc.plate.carbohidratos.length ? `<div class="food-group"><div class="dot" style="background:#BA7517;"></div><div class="content"><strong>Carbohidratos</strong>${sc.plate.carbohidratos.join(', ')}</div></div>` : ''}
+        ${sc.plate.otros && sc.plate.otros.length ? `<div class="food-group"><div class="dot" style="background:#5F5E5A;"></div><div class="content"><strong>Otros</strong>${sc.plate.otros.join(', ')}</div></div>` : ''}
+        ${sc.plate.bebidas.length ? `<div class="food-group"><div class="dot" style="background:#3372A2;"></div><div class="content"><strong>Bebidas</strong>${sc.plate.bebidas.join(', ')}</div></div>` : ''}
+      </div>
+    </div>`;
+  }
+  panel.innerHTML = html;
+}
+
+function runProcessingSequence(callback) {
+  const dotsEl = document.getElementById('processing-dots');
+  const steps = [
+    "Analizando composición de alimentos...",
+    "Contextualizando factores de estilo de vida...",
+    "Identificando relaciones...",
+    "Generando síntesis integradora..."
+  ];
+  let i = 0;
+  dotsEl.textContent = steps[0];
+  const interval = setInterval(() => {
+    i++;
+    if (i < steps.length) {
+      dotsEl.textContent = steps[i];
+    } else {
+      clearInterval(interval);
+      setTimeout(callback, 500);
+    }
+  }, 650);
+}
+
+function renderSynthesis(sc) {
+  const card = document.getElementById('synth-card');
+  const s = sc.synthesis;
+  let valueBlock;
+  if (s.displayType === "trio") {
+    valueBlock = `
+      <div class="trio">
+        <div class="trio-cell pre"><div class="trio-num">${s.pre}</div><div class="trio-lbl">PRE</div></div>
+        <div class="trio-cell delta"><div class="trio-num">+${s.delta}</div><div class="trio-lbl">ASCENSO</div></div>
+        <div class="trio-cell post"><div class="trio-num">${s.post}</div><div class="trio-lbl">POST</div></div>
+      </div>
+      <div style="text-align:center; font-size: 13px; font-weight: 700; color: var(--amber-text); background: var(--amber-bg); padding: 8px 14px; border-radius: 10px; margin-bottom: 20px;">${s.valueLabel}</div>
+    `;
+  } else if (s.displayType === "pair") {
+    valueBlock = `
+      <div class="trio" style="grid-template-columns: 1fr 1fr;">
+        <div class="trio-cell pre"><div class="trio-num">${s.pre}</div><div class="trio-lbl">PRE</div></div>
+        <div class="trio-cell pre"><div class="trio-num">${s.post}</div><div class="trio-lbl">POST</div></div>
+      </div>
+      <div style="text-align:center; font-size: 13px; font-weight: 700; color: var(--green-text); background: var(--green-bg); padding: 8px 14px; border-radius: 10px; margin-bottom: 20px;">${s.valueLabel}</div>
+    `;
+  } else {
+    valueBlock = `
+      <div class="val-display ${s.valueColor}">
+        <div><span class="val-number">${s.value}</span><span class="val-unit">mg/dL</span></div>
+        <div class="val-label">${s.valueLabel}</div>
+      </div>
+    `;
+  }
+  const badgesHTML = s.badges.map(b => `
+    <div class="badge ${b.color}">
+      <div class="badge-left"><span class="badge-icon">${b.icon}</span><span>${b.name}</span></div>
+      <span class="badge-text">${b.relation}</span>
+    </div>
+  `).join('');
+  card.innerHTML = `
+    <div class="synth-header">
+      <div class="synth-header-top"><span>GPS DE GLUCOSA</span><span>${sc.date}</span></div>
+      <div class="synth-moment">${sc.moment}</div>
+    </div>
+    <div class="synth-body">
+      ${valueBlock}
+      <div class="badges-label">Factores del registro</div>
+      <div class="badges">${badgesHTML}</div>
+      <div class="badges-label">Síntesis integradora</div>
+      <div class="synth-message">${s.message}</div>
+    </div>
+    <div class="synth-footer">Conciencia en tu Salud · @concienciaentusalud</div>
+  `;
+}
+</script>
+
+</body>
+</html>
